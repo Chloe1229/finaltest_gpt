@@ -1408,10 +1408,12 @@ def create_application_docx(current_key, result, requirements, selections, outpu
     para = doc.add_paragraph("「의약품 허가 후 제조방법 변경관리 가이드라인(민원인 안내서)」[붙임] 신청양식 예시")
     para.runs[0].font.size = Pt(12)
     para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    para.paragraph_format.line_spacing = 1.4
 
     para = doc.add_paragraph("1. 신청인")
     para.runs[0].font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    para.paragraph_format.line_spacing = 1.4
     table1 = doc.add_table(rows=3, cols=2)
     table1.style = 'Table Grid'
     table1.cell(0, 0).text = "성명"
@@ -1424,6 +1426,7 @@ def create_application_docx(current_key, result, requirements, selections, outpu
     para = doc.add_paragraph("2. 변경유형")
     para.runs[0].font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    para.paragraph_format.line_spacing = 1.4
     table2 = doc.add_table(rows=1, cols=1)
     table2.style = 'Table Grid'
     table2.cell(0, 0).text = result["title_text"]
@@ -1432,6 +1435,7 @@ def create_application_docx(current_key, result, requirements, selections, outpu
     para = doc.add_paragraph("3. 신청유형")
     para.runs[0].font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    para.paragraph_format.line_spacing = 1.4
     table3 = doc.add_table(rows=2, cols=2)
     table3.style = 'Table Grid'
     table3.cell(0, 0).text = "분류"
@@ -1444,6 +1448,7 @@ def create_application_docx(current_key, result, requirements, selections, outpu
     para = doc.add_paragraph("4. 충족조건")
     para.runs[0].font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    para.paragraph_format.line_spacing = 1.4
     max_reqs = max(5, min(15, len(requirements)))
     table4 = doc.add_table(rows=max_reqs + 1, cols=2)
     table4.style = 'Table Grid'
@@ -1469,6 +1474,7 @@ def create_application_docx(current_key, result, requirements, selections, outpu
     para = doc.add_paragraph("5. 필요서류")
     para.runs[0].font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    para.paragraph_format.line_spacing = 1.4
     max_docs = max(5, min(15, len(output2_text_list)))
     table5 = doc.add_table(rows=max_docs, cols=1)
     table5.style = 'Table Grid'
@@ -1487,6 +1493,10 @@ if st.session_state.step == 8:
     step6_selections = st.session_state.get("step6_selections", {})
 
     title_keys = list(step7_results.keys())
+    if not title_keys:
+        st.error("결과가 없어 Step7로 돌아갑니다.")
+        st.session_state.step = 7
+        st.stop()
     if "step8_page" not in st.session_state:
         st.session_state.step8_page = 0
 
@@ -1561,14 +1571,21 @@ with col3:
     <tr><td colspan="2">{result["output_1_text"].replace('\n', '<br>')}</td></tr>
     </table><br>
     <h5>4. 충족조건</h5>
-    <table><tr><th>충족조건</th><th>조건 충족 여부</th></tr>
-    """
-    for rk, text in requirements.items():
-        state = selections.get(f"{current_key}_req_{rk}", "")
-        symbol = "○" if state == "충족" else "×" if state == "미충족" else ""
+    req_items = list(requirements.items())
+    max_reqs = max(5, min(15, len(req_items)))
+    for idx in range(max_reqs):
+        if idx < len(req_items):
+            rk, text = req_items[idx]
+            state = selections.get(f"{current_key}_req_{rk}", "")
+            symbol = "○" if state == "충족" else "×" if state == "미충족" else ""
+        else:
+            text = ""
+            symbol = ""
         html += f"<tr><td style='text-align:left'>{text}</td><td>{symbol}</td></tr>"
     html += "</table><br><h5>5. 필요서류</h5><table><tr><th>서류</th></tr>"
-    for line in output2_text_list:
+    max_docs = max(5, min(15, len(output2_text_list)))
+    for i in range(max_docs):
+        line = output2_text_list[i] if i < len(output2_text_list) else ""
         html += f"<tr><td style='text-align:left'>{line}</td></tr>"
     html += "</table><br>"
     st.markdown(html, unsafe_allow_html=True)
