@@ -1568,34 +1568,34 @@ html = f"""
     """
     <table><tr><th>충족조건</th><th>조건 충족 여부</th></tr>
     """
-req_items = list(requirements.items())
-max_reqs = max(5, min(15, len(req_items)))
-for idx in range(max_reqs):
-    if idx < len(req_items):
-        rk, text = req_items[idx]
-        state = selections.get(f"{current_key}_req_{rk}", "")
-        symbol = "○" if state == "충족" else "×" if state == "미충족" else ""
-    else:
-        text = ""
-        symbol = ""
-    html += f"<tr><td style='text-align:left'>{text}</td><td>{symbol}</td></tr>"
-html += "</table><br><h5>5. 필요서류</h5><table><tr><th>서류</th></tr>"
-max_docs = max(5, min(15, len(output2_text_list)))
-for i in range(max_docs):
-    line = output2_text_list[i] if i < len(output2_text_list) else ""
-    html += f"<tr><td style='text-align:left'>{line}</td></tr>"
-html += "</table><br>"
-st.markdown(html, unsafe_allow_html=True)
-
-col_left, col_right = st.columns(2)
-with col_left:
-    if st.button("⬅ 이전"):
-        if st.session_state.step8_page == 0:
-            st.session_state.step = 7
-            if "step8_page" in st.session_state:
-                del st.session_state["step8_page"]
+    req_items = list(requirements.items())
+    max_reqs = max(5, min(15, len(req_items)))
+    for idx in range(max_reqs):
+        if idx < len(req_items):
+            rk, text = req_items[idx]
+            state = selections.get(f"{current_key}_req_{rk}", "")
+            symbol = "○" if state == "충족" else "×" if state == "미충족" else ""
         else:
-            st.session_state.step8_page -= 1
-with col_right:
-    if st.button("다음 ➡") and st.session_state.step8_page < total_pages - 1:
-        st.session_state.step8_page += 1
+            text = ""
+            symbol = ""
+        html += f"<tr><td style='text-align:left'>{text}</td><td>{symbol}</td></tr>"
+    html += "</table><br><h5>5. 필요서류</h5><table><tr><th>서류</th></tr>"
+    max_docs = max(5, min(15, len(output2_text_list)))
+    for i in range(max_docs):
+        line = output2_text_list[i] if i < len(output2_text_list) else ""
+        html += f"<tr><td style='text-align:left'>{line}</td></tr>"
+    html += "</table><br>"
+    st.markdown(html, unsafe_allow_html=True)
+
+    col_left, col_right = st.columns(2)
+    with col_left:
+        if st.button("⬅ 이전"):
+            if st.session_state.step8_page == 0:
+                st.session_state.step = 7
+                if "step8_page" in st.session_state:
+                    del st.session_state["step8_page"]
+            else:
+                st.session_state.step8_page -= 1
+    with col_right:
+        if st.button("다음 ➡") and st.session_state.step8_page < total_pages - 1:
+            st.session_state.step8_page += 1
