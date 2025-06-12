@@ -1,7 +1,8 @@
 import streamlit as st
-import base64
-import datetime
-import os
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from tempfile import NamedTemporaryFile
 
 from docx import Document
 
@@ -1390,13 +1391,6 @@ if st.session_state.step == 7:
 
 # ===== Step8: 신청양식 PDF 생성 =====
 
-
-import streamlit as st
-from docx import Document
-from docx.shared import Pt
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-import os
-
 def set_cell_font(cell, font_size=11):
     for paragraph in cell.paragraphs:
         for run in paragraph.runs:
@@ -1513,8 +1507,6 @@ if st.session_state.step == 8:
         for rk in requirements
     }
     output2_text_list = [line.strip() for line in result.get("output_2_text", "").split("\n") if line.strip()]
-    
-from tempfile import NamedTemporaryFile
 with NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
     file_path = tmp.name
     create_application_docx(
@@ -1536,6 +1528,7 @@ with col1:
         file_bytes,
         file_name=f"신청서_{current_key}.docx",
     )
+os.remove(file_path)
 with col2:
     st.markdown(
         f"<h5 style='text-align:center'>「의약품 허가 후 제조방법 변경관리 가이드라인(민원인 안내서)」[붙임] 신청양식 예시<br>{page+1} / {total_pages}</h5>",
@@ -1546,7 +1539,7 @@ with col3:
         st.markdown("<script>window.print();</script>", unsafe_allow_html=True)
 
 
-    html = f"""
+html = f"""
     <style>
     table, th, td {{
         border: 1px solid black; border-collapse: collapse;
@@ -1571,34 +1564,38 @@ with col3:
     <tr><td colspan="2">{result["output_1_text"].replace('\n', '<br>')}</td></tr>
     </table><br>
     <h5>4. 충족조건</h5>
-    req_items = list(requirements.items())
-    max_reqs = max(5, min(15, len(req_items)))
-    for idx in range(max_reqs):
-        if idx < len(req_items):
-            rk, text = req_items[idx]
-            state = selections.get(f"{current_key}_req_{rk}", "")
-            symbol = "○" if state == "충족" else "×" if state == "미충족" else ""
-        else:
-            text = ""
-            symbol = ""
-        html += f"<tr><td style='text-align:left'>{text}</td><td>{symbol}</td></tr>"
-    html += "</table><br><h5>5. 필요서류</h5><table><tr><th>서류</th></tr>"
-    max_docs = max(5, min(15, len(output2_text_list)))
-    for i in range(max_docs):
-        line = output2_text_list[i] if i < len(output2_text_list) else ""
-        html += f"<tr><td style='text-align:left'>{line}</td></tr>"
-    html += "</table><br>"
-    st.markdown(html, unsafe_allow_html=True)
+    <table><tr><th>충족조건</th><th>조건 충족 여부</th></tr>
+    """
+    <table><tr><th>충족조건</th><th>조건 충족 여부</th></tr>
+    """
+req_items = list(requirements.items())
+max_reqs = max(5, min(15, len(req_items)))
+for idx in range(max_reqs):
+    if idx < len(req_items):
+        rk, text = req_items[idx]
+        state = selections.get(f"{current_key}_req_{rk}", "")
+        symbol = "○" if state == "충족" else "×" if state == "미충족" else ""
+    else:
+        text = ""
+        symbol = ""
+    html += f"<tr><td style='text-align:left'>{text}</td><td>{symbol}</td></tr>"
+html += "</table><br><h5>5. 필요서류</h5><table><tr><th>서류</th></tr>"
+max_docs = max(5, min(15, len(output2_text_list)))
+for i in range(max_docs):
+    line = output2_text_list[i] if i < len(output2_text_list) else ""
+    html += f"<tr><td style='text-align:left'>{line}</td></tr>"
+html += "</table><br>"
+st.markdown(html, unsafe_allow_html=True)
 
-    col_left, col_right = st.columns(2)
-    with col_left:
-        if st.button("⬅ 이전"):
-            if st.session_state.step8_page == 0:
-                st.session_state.step = 7
-                if "step8_page" in st.session_state:
-                    del st.session_state["step8_page"]
-            else:
-                st.session_state.step8_page -= 1
-    with col_right:
-        if st.button("다음 ➡") and st.session_state.step8_page < total_pages - 1:
-            st.session_state.step8_page += 1
+col_left, col_right = st.columns(2)
+with col_left:
+    if st.button("⬅ 이전"):
+        if st.session_state.step8_page == 0:
+            st.session_state.step = 7
+            if "step8_page" in st.session_state:
+                del st.session_state["step8_page"]
+        else:
+            st.session_state.step8_page -= 1
+with col_right:
+    if st.button("다음 ➡") and st.session_state.step8_page < total_pages - 1:
+        st.session_state.step8_page += 1
