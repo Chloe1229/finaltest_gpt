@@ -1549,6 +1549,7 @@ if st.session_state.step == 8:
         if st.button("🖨 인쇄하기"):
             st.markdown("<script>window.print();</script>", unsafe_allow_html=True)
 
+    output1_html = result["output_1_text"].replace("\n", "<br>")
 
     html = f"""
     <style>
@@ -1574,7 +1575,7 @@ if st.session_state.step == 8:
     <h5>3. 신청유형</h5>
     <table>
     <tr><td>분류</td><td>{result["output_1_tag"]}</td></tr>
-    <tr><td colspan="2">{result["output_1_text"].replace('\n', '<br>')}</td></tr>
+    <tr><td colspan="2">{output1_html}</td></tr>
     </table><br>
     <h5>4. 충족조건</h5>
     <table><tr><th>충족조건</th><th>조건 충족 여부</th></tr>
