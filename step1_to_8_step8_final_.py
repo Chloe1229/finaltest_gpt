@@ -3,8 +3,7 @@ from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from tempfile import NamedTemporaryFile
-
-from docx import Document
+import os
 
 # ===== 초기 상태 정의 =====
 if "step" not in st.session_state:
@@ -1399,13 +1398,17 @@ def set_cell_font(cell, font_size=11):
 
 def create_application_docx(current_key, result, requirements, selections, output2_text_list, file_path):
     doc = Document()
-    para = doc.add_paragraph("「의약품 허가 후 제조방법 변경관리 가이드라인(민원인 안내서)」[붙임] 신청양식 예시")
-    para.runs[0].font.size = Pt(12)
+    para = doc.add_heading("「의약품 허가 후 제조방법 변경관리 가이드라인(민원인 안내서)」[붙임] 신청양식 예시", level=0)
+    run = para.runs[0]
+    run.bold = True
+    run.font.size = Pt(12)
     para.alignment = WD_ALIGN_PARAGRAPH.CENTER
     para.paragraph_format.line_spacing = 1.4
 
-    para = doc.add_paragraph("1. 신청인")
-    para.runs[0].font.size = Pt(11)
+    para = doc.add_heading("1. 신청인", level=1)
+    run = para.runs[0]
+    run.bold = True
+    run.font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
     para.paragraph_format.line_spacing = 1.4
     table1 = doc.add_table(rows=3, cols=2)
@@ -1417,8 +1420,10 @@ def create_application_docx(current_key, result, requirements, selections, outpu
         set_cell_font(table1.cell(i, 0), 11)
         set_cell_font(table1.cell(i, 1), 11)
 
-    para = doc.add_paragraph("2. 변경유형")
-    para.runs[0].font.size = Pt(11)
+    para = doc.add_heading("2. 변경유형", level=1)
+    run = para.runs[0]
+    run.bold = True
+    run.font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
     para.paragraph_format.line_spacing = 1.4
     table2 = doc.add_table(rows=1, cols=1)
@@ -1426,8 +1431,10 @@ def create_application_docx(current_key, result, requirements, selections, outpu
     table2.cell(0, 0).text = result["title_text"]
     set_cell_font(table2.cell(0, 0), 11)
 
-    para = doc.add_paragraph("3. 신청유형")
-    para.runs[0].font.size = Pt(11)
+    para = doc.add_heading("3. 신청유형", level=1)
+    run = para.runs[0]
+    run.bold = True
+    run.font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
     para.paragraph_format.line_spacing = 1.4
     table3 = doc.add_table(rows=2, cols=2)
@@ -1439,8 +1446,10 @@ def create_application_docx(current_key, result, requirements, selections, outpu
         for cell in row.cells:
             set_cell_font(cell, 11)
 
-    para = doc.add_paragraph("4. 충족조건")
-    para.runs[0].font.size = Pt(11)
+    para = doc.add_heading("4. 충족조건", level=1)
+    run = para.runs[0]
+    run.bold = True
+    run.font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
     para.paragraph_format.line_spacing = 1.4
     max_reqs = max(5, min(15, len(requirements)))
@@ -1465,8 +1474,10 @@ def create_application_docx(current_key, result, requirements, selections, outpu
         set_cell_font(table4.cell(idx+1, 0), 11)
         set_cell_font(table4.cell(idx+1, 1), 11)
 
-    para = doc.add_paragraph("5. 필요서류")
-    para.runs[0].font.size = Pt(11)
+    para = doc.add_heading("5. 필요서류", level=1)
+    run = para.runs[0]
+    run.bold = True
+    run.font.size = Pt(11)
     para.alignment = WD_ALIGN_PARAGRAPH.LEFT
     para.paragraph_format.line_spacing = 1.4
     max_docs = max(5, min(15, len(output2_text_list)))
@@ -1507,39 +1518,39 @@ if st.session_state.step == 8:
         for rk in requirements
     }
     output2_text_list = [line.strip() for line in result.get("output_2_text", "").split("\n") if line.strip()]
-with NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
-    file_path = tmp.name
-    create_application_docx(
-        current_key,
-        result,
-        requirements,
-        selections,
-        output2_text_list,
-        file_path,
-    )
+    with NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
+        file_path = tmp.name
+        create_application_docx(
+            current_key,
+            result,
+            requirements,
+            selections,
+            output2_text_list,
+            file_path,
+        )
 
-with open(file_path, "rb") as f:
-    file_bytes = f.read()
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
 
-col1, col2, col3 = st.columns([1, 3, 1])
-with col1:
-    st.download_button(
-        "📄 파일 다운로드",
-        file_bytes,
-        file_name=f"신청서_{current_key}.docx",
-    )
-os.remove(file_path)
-with col2:
-    st.markdown(
-        f"<h5 style='text-align:center'>「의약품 허가 후 제조방법 변경관리 가이드라인(민원인 안내서)」[붙임] 신청양식 예시<br>{page+1} / {total_pages}</h5>",
-        unsafe_allow_html=True,
-    )
-with col3:
-    if st.button("🖨 인쇄하기"):
-        st.markdown("<script>window.print();</script>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 3, 1])
+    with col1:
+        st.download_button(
+            "📄 파일 다운로드",
+            file_bytes,
+            file_name=f"신청서_{current_key}.docx",
+        )
+    os.remove(file_path)
+    with col2:
+        st.markdown(
+            f"<h5 style='text-align:center'>「의약품 허가 후 제조방법 변경관리 가이드라인(민원인 안내서)」[붙임] 신청양식 예시<br>{page+1} / {total_pages}</h5>",
+            unsafe_allow_html=True,
+        )
+    with col3:
+        if st.button("🖨 인쇄하기"):
+            st.markdown("<script>window.print();</script>", unsafe_allow_html=True)
 
 
-html = f"""
+    html = f"""
     <style>
     table, th, td {{
         border: 1px solid black; border-collapse: collapse;
