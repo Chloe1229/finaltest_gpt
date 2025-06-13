@@ -1559,6 +1559,8 @@ if st.session_state.step == 8:
     }}
     th, td {{
         font-size: 14px;
+        line-height: 1.4;
+
     }}
     </style>
     <br><h5>1. 신청인</h5>
